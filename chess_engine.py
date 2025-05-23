@@ -1,7 +1,20 @@
+import sys
+import os
 import math
 from typing import Optional, Tuple
 
 import chess
+
+board = chess.Board()
+DEPTH = 6
+
+
+def get_input(prompt: Optional[str] = None) -> Optional[str]:
+    prompt = prompt if prompt else ""
+    try:
+        return input(prompt)
+    except EOFError:
+        return None
 
 
 def evaluate_board(board: chess.Board) -> float:
@@ -120,5 +133,73 @@ def play_game(depth: int = 3, user_plays_white: bool = True) -> None:
     print(f"Result: {result} ({board.outcome().termination.name})")
 
 
+def uci() -> None:
+    print("id name Chessfool 0.0.0")
+    print("id author Piotr Kuchta and Jakub Szaredko")
+    print()
+    print("uciok")
+
+    while True:
+        raw_command = get_input()
+        if raw_command is None:
+            break
+        command = raw_command.strip()
+
+        if command == "isready":
+            print("readyok")
+        if command.startswith("position"):
+            set_position(command)
+        if command.startswith("go"):
+            _, best_move = alpha_beta(
+                board,
+                DEPTH,
+                alpha=-math.inf,
+                beta=math.inf,
+                maximising_player=board.turn
+            )
+            print(f"bestmove {best_move.uci()}")
+        if command == "quit":
+            break
+
+
+def set_position(command: str) -> None:
+    global board
+    tokens = command.split()
+
+    if "startpos" in tokens:
+        board = chess.Board()
+        moves_index = tokens.index("moves") if "moves" in tokens else None
+    elif "fen" in tokens:
+        fen_index = tokens.index("fen") + 1
+        fen = " ".join(tokens[fen_index:fen_index + 6])
+        board = chess.Board(fen)
+        moves_index = tokens.index("moves") if "moves" in tokens else None
+    else:
+        return
+
+    if moves_index:
+        for move in tokens[moves_index + 1:]:
+            board.push_uci(move)
+
+
 if __name__ == "__main__":
-    play_game(depth=6, user_plays_white=True)  # Set to False to play Black
+    line_width = 52
+    header_char = "="
+    print(line_width * "=")
+    print(f"={'Chessfool v0.0.0'.center(line_width - 2)}=")
+    print(line_width * "=")
+
+    print("To continue type 'uci' or 'cli'.")
+    print("Type 'quit' to exit the program.")
+    raw_command = get_input()
+    command = raw_command.strip().lower() if raw_command is not None else "quit"
+
+    match command:
+        case "uci":
+            uci()
+        case "cli":
+            play_game(DEPTH, user_plays_white=True)
+        case "quit":
+            exit(os.EX_OK)
+        case _:
+            print(f"Unknown command '{raw_command.strip()}'.", file=sys.stderr)
