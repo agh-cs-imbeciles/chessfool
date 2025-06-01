@@ -60,7 +60,7 @@ def alpha_beta(
     beta: float,
     maximising_player: bool
 ) -> Tuple[float, Optional[chess.Move]]:
-    if depth == 0 or board.is_game_over():
+    if depth == 0 or board.is_game_over(claim_draw=True):
         return evaluate_board(board), None
 
     best_move: Optional[chess.Move] = None
