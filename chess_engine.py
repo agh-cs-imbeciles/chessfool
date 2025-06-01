@@ -1,6 +1,6 @@
 import sys
 import os
-import math
+from math import inf
 from typing import Optional, Tuple
 
 import chess
@@ -66,7 +66,7 @@ def alpha_beta(
     best_move: Optional[chess.Move] = None
 
     if maximising_player:
-        max_eval: float = -math.inf
+        max_eval: float = -inf
         for move in board.legal_moves:
             board.push(move)
             eval_score, _ = alpha_beta(board, depth - 1, alpha, beta, False)
@@ -80,7 +80,7 @@ def alpha_beta(
         return max_eval, best_move
 
     else:
-        min_eval: float = math.inf
+        min_eval: float = inf
         for move in order_moves(board):
             board.push(move)
             eval_score, _ = alpha_beta(board, depth - 1, alpha, beta, True)
@@ -119,7 +119,7 @@ def play_game(depth: int = 3, user_plays_white: bool = True) -> None:
                 continue
         else:
             print("\nAI is thinking...")
-            eval_score, best_move = alpha_beta(board, depth, -math.inf, math.inf, board.turn == chess.WHITE)
+            eval_score, best_move = alpha_beta(board, depth, -inf, inf, board.turn == chess.WHITE)
             print(f"AI plays {best_move} (eval: {eval_score:.2f})")
             if best_move:
                 board.push(best_move)
@@ -153,8 +153,8 @@ def uci() -> None:
             _, best_move = alpha_beta(
                 board,
                 DEPTH,
-                alpha=-math.inf,
-                beta=math.inf,
+                alpha=-inf,
+                beta=inf,
                 maximising_player=board.turn
             )
             print(f"bestmove {best_move.uci()}")
