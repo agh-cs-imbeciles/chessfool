@@ -21,7 +21,13 @@ def evaluate_board(board: chess.Board) -> float:
     """
     Basic evaluation function: returns a static evaluation of the position.
     Positive for White, negative for Black.
+    If the game is over for one of players returns infinity or -infinity for
+    white or black respectively.
     """
+    outcome = board.outcome(claim_draw=True)
+    if outcome and outcome.winner:
+        return inf if outcome.winner else -inf
+
     values: dict[chess.PieceType, float] = {
         chess.PAWN: 1.0,
         chess.KNIGHT: 3.0,
