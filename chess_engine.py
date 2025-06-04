@@ -24,7 +24,7 @@ def evaluate_board(board: chess.Board) -> float:
     If the game is over for one of the players returns infinity or -infinity for
     white or black respectively or 0.0 in the case of draw.
     """
-    outcome = board.outcome(claim_draw=True)
+    outcome = board.outcome()
     if outcome:
         if outcome.winner == chess.WHITE:
             return inf
@@ -70,7 +70,7 @@ def alpha_beta(
     beta: float,
     maximising_player: bool
 ) -> Tuple[float, Optional[chess.Move]]:
-    if depth == 0 or board.is_game_over(claim_draw=True):
+    if depth == 0 or board.is_game_over():
         return evaluate_board(board), None
 
     best_move: Optional[chess.Move] = None
