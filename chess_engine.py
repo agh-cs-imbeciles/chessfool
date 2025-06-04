@@ -48,7 +48,7 @@ def evaluate_board(board: chess.Board) -> float:
     return score
 
 
-def order_moves(board: chess.Board) -> list[chess.Move]:
+def ordered_legal_moves(board: chess.Board) -> list[chess.Move]:
     """
     Prioritise captures over quiet moves (MVV-LVA).
     """
@@ -77,7 +77,7 @@ def alpha_beta(
 
     if maximising_player:
         max_eval: float = -inf
-        for move in board.legal_moves:
+        for move in ordered_legal_moves(board):
             board.push(move)
             eval_score, _ = alpha_beta(board, depth - 1, alpha, beta, False)
             board.pop()
@@ -91,7 +91,7 @@ def alpha_beta(
 
     else:
         min_eval: float = inf
-        for move in order_moves(board):
+        for move in ordered_legal_moves(board):
             board.push(move)
             eval_score, _ = alpha_beta(board, depth - 1, alpha, beta, True)
             board.pop()
