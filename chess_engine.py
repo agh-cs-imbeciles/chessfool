@@ -41,7 +41,7 @@ def evaluate_board(board: chess.Board) -> int:
         chess.KING: 0,
     }
 
-    score: float = 0
+    score: int = 0
 
     for piece_type, value in values.items():
         score += len(board.pieces(piece_type, chess.WHITE)) * value
