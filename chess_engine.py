@@ -17,12 +17,12 @@ def get_input(prompt: Optional[str] = None) -> Optional[str]:
         return None
 
 
-def evaluate_board(board: chess.Board) -> float:
+def evaluate_board(board: chess.Board) -> int:
     """
     Basic evaluation function: returns a static evaluation of the position.
     Positive for White, negative for Black.
     If the game is over for one of the players returns infinity or -infinity for
-    white or black respectively or 0.0 in the case of draw.
+    white or black respectively or 0 in the case of draw.
     """
     outcome = board.outcome()
     if outcome:
@@ -30,18 +30,19 @@ def evaluate_board(board: chess.Board) -> float:
             return inf
         if outcome.winner == chess.BLACK:
             return -inf
-        return 0.0
+        return 0
 
     values: dict[chess.PieceType, float] = {
-        chess.PAWN: 1.0,
-        chess.KNIGHT: 3.0,
-        chess.BISHOP: 3.2,
-        chess.ROOK: 5.0,
-        chess.QUEEN: 9.0,
-        chess.KING: 0.0
+        chess.PAWN: 100,
+        chess.KNIGHT: 320,
+        chess.BISHOP: 330,
+        chess.ROOK: 500,
+        chess.QUEEN: 900,
+        chess.KING: 0,
     }
 
-    score: float = 0.0
+    score: int = 0
+
     for piece_type, value in values.items():
         score += len(board.pieces(piece_type, chess.WHITE)) * value
         score -= len(board.pieces(piece_type, chess.BLACK)) * value
