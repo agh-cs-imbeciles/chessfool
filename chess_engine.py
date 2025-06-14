@@ -1,10 +1,15 @@
 import sys
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import os
 from math import inf
 from typing import Optional, Tuple
 
 import chess
+import torch
 
+from nnue_network import SimpleNNUE, encode_board
+
+nnue = SimpleNNUE()
 board = chess.Board()
 DEPTH = 6
 
@@ -145,7 +150,9 @@ def evaluate_board(board: chess.Board) -> int:
         if outcome.winner == chess.BLACK:
             return -inf
         return 0
-
+    # encoded_board = encode_board(board)
+    # score = nnue(encoded_board)
+    # score = -score[0]
     values: dict[chess.PieceType, float] = {
         chess.PAWN: 100,
         chess.KNIGHT: 320,
@@ -275,6 +282,8 @@ def uci() -> None:
         command = raw_command.strip()
 
         if command == "isready":
+            nnue.load_state_dict(torch.load("nnue_model_weights.pth", map_location="cpu"))
+            nnue.eval()
             print("readyok")
         if command.startswith("position"):
             set_position(command)
@@ -327,6 +336,8 @@ if __name__ == "__main__":
         case "uci":
             uci()
         case "cli":
+            # nnue.load_state_dict(torch.load("nnue_model_weights.pth", map_location="cpu"))
+            # nnue.eval()
             play_game(DEPTH, user_plays_white=True)
         case "quit":
             exit(os.EX_OK)
