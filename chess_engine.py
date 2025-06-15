@@ -11,7 +11,7 @@ from nnue_network import SimpleNNUE, encode_board
 
 nnue = SimpleNNUE()
 board = chess.Board()
-DEPTH = 6
+DEPTH = 4
 
 WHITE_PAWN_TABLE = [
      0,  0,  0,   0,  0,  0,  0,  0,
@@ -150,26 +150,26 @@ def evaluate_board(board: chess.Board) -> int:
         if outcome.winner == chess.BLACK:
             return -inf
         return 0
-    # encoded_board = encode_board(board)
-    # score = nnue(encoded_board)
-    # score = -score[0]
-    values: dict[chess.PieceType, float] = {
-        chess.PAWN: 100,
-        chess.KNIGHT: 320,
-        chess.BISHOP: 330,
-        chess.ROOK: 500,
-        chess.QUEEN: 900,
-        chess.KING: 0,
-    }
+    encoded_board = encode_board(board)
+    score = nnue(encoded_board)
+    score = -score[0]
+    # values: dict[chess.PieceType, float] = {
+    #     chess.PAWN: 100,
+    #     chess.KNIGHT: 320,
+    #     chess.BISHOP: 330,
+    #     chess.ROOK: 500,
+    #     chess.QUEEN: 900,
+    #     chess.KING: 0,
+    # }
 
-    score: int = 0
+    # score: int = 0
 
-    for piece_type, value in values.items():
-        score += len(board.pieces(piece_type, chess.WHITE)) * value
-        score -= len(board.pieces(piece_type, chess.BLACK)) * value
+    # for piece_type, value in values.items():
+    #     score += len(board.pieces(piece_type, chess.WHITE)) * value
+    #     score -= len(board.pieces(piece_type, chess.BLACK)) * value
 
-    for square, piece in board.piece_map().items():
-        score += PIECE_SQUARE_TABLES[(piece.piece_type, piece.color)][square]
+    # for square, piece in board.piece_map().items():
+    #     score += PIECE_SQUARE_TABLES[(piece.piece_type, piece.color)][square]
 
     return score
 
@@ -336,8 +336,8 @@ if __name__ == "__main__":
         case "uci":
             uci()
         case "cli":
-            # nnue.load_state_dict(torch.load("nnue_model_weights.pth", map_location="cpu"))
-            # nnue.eval()
+            nnue.load_state_dict(torch.load("nnue_model_weights.pth", map_location="cpu"))
+            nnue.eval()
             play_game(DEPTH, user_plays_white=True)
         case "quit":
             exit(os.EX_OK)

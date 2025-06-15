@@ -65,16 +65,16 @@ def train_model(model: SimpleNNUE, dataset: ChessDataset, validation_dataset: Ch
         validation_loss = 0.0
 
         for inputs, targets in validation:
-            inputs = inputs.float()
-            targets = targets.float().view(-1, 1)  # Reshape to (batch_size, 1)
+            inputs = inputs.float().to(device)
+            targets = targets.float().view(-1, 1).to(device)  # Reshape to (batch_size, 1)
 
             outputs = model(inputs)
             loss = criterion(outputs, targets)
 
             validation_loss += loss.item()
         for inputs, targets in dataloader:
-            inputs = inputs.float()
-            targets = targets.float().view(-1, 1)  # Reshape to (batch_size, 1)
+            inputs = inputs.float().to(device)
+            targets = targets.float().view(-1, 1).to(device) # Reshape to (batch_size, 1)
 
             optimizer.zero_grad()
             outputs = model(inputs)
