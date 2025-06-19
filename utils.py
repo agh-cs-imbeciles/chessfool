@@ -4,51 +4,39 @@ import pandas as pd
 import torch
 from typing import Iterator
 
-max_val = 16000 # max,min in chessData.csv
-min_val = -max_val
-
-# def find_min_max_in_csv(filepath: str) -> tuple[int, int]:
-#     min_value = float('inf')
-#     max_value = float('-inf')
-#     for chunk in pd.read_csv(filepath, chunksize=1000):
-#         values = chunk.iloc[:, 1].astype(str).apply(points_decode)
-#         min_chunk = values.min()
-#         max_chunk = values.max()
-#         if min_chunk < min_value:
-#             min_value = min_chunk
-#         if max_chunk > max_value:
-#             max_value = max_chunk
-#     return min_value, max_value
 
 def encode_board(board: chess.Board | str) -> torch.Tensor:
     if isinstance(board, str):
-        board = chess.Board(board)
+        board_real = chess.Board(board)
+    else:
+        board_real = board
 
-    board_vector = torch.zeros(769)
-
-    for square in chess.SQUARES:
-        piece = board.piece_at(square)
+    board_vector = torch.zeros(768)
+    for square, piece in board_real.piece_map().items():
         if piece is not None:
             piece_type = piece.piece_type
             piece_color = 0 if piece.color else 1
             index = piece_color * 64 * 6 + (piece_type-1) * 64 + square
             board_vector[index] = 1.0
-    board_vector[768] = 0.0 if board.turn else 1.0
-
+    del board_real
     return board_vector
 
-def points_decode(val: str) -> int:
-    if val[0] == '#':
-        return max_val if val[1] != 0 else min_val
-    return int(val)
 
 def load_and_encode_csv(
     filepath: str, batch_size: int
-) -> Iterator[tuple[list[torch.Tensor], list[torch.Tensor]]]:
+) -> tuple[list[torch.Tensor], list[torch.Tensor]]:
+    boards_all = []
+    points_all = []
     chunk_iter = pd.read_csv(filepath, chunksize=batch_size)
+    currnum = 0
     for chunk in chunk_iter:
+        print(f"Start loading of entries with indexes {currnum} to {currnum+len(chunk)}")
         boards = chunk.iloc[:, 0].apply(encode_board).tolist()
-        points = chunk.iloc[:, 1].astype(str).apply(points_decode).tolist()
+        points = chunk.iloc[:, 1].astype(int).tolist()
         points = [torch.tensor([p], dtype=torch.float32) for p in points]
-        yield boards, points
+        boards_all.extend(boards)
+        points_all.extend(points)
+        print(f"Loaded {len(chunk)} entries")
+        currnum += len(chunk)
+    return boards_all, points_all
 

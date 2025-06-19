@@ -34,23 +34,6 @@ class ChessDataset(Dataset):
         return self.X[idx], self.y[idx]
 
 
-def encode_board(board: chess.Board | str) -> torch.Tensor:
-    if isinstance(board, str):
-        board = chess.Board(board)
-
-    board_vector = torch.zeros(769)
-
-    for square in chess.SQUARES:
-        piece = board.piece_at(square)
-        if piece is not None:
-            piece_type = piece.piece_type
-            piece_color = 0 if piece.color else 1
-            index = piece_color * 64 * 6 + (piece_type-1) * 64 + square
-            board_vector[index] = 1.0
-    board_vector[768] = 0.0 if board.turn else 1.0
-
-    return board_vector
-
 def train_model(model: SimpleNNUE, dataset: ChessDataset, validation_dataset: ChessDataset, epochs=10, batch_size=32, lr=0.001, device='cpu'):
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     validation = DataLoader(validation_dataset, batch_size=batch_size, shuffle=True)
