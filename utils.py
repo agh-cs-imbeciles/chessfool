@@ -3,7 +3,10 @@ import chess
 import pandas as pd
 import torch
 from typing import Iterator
+import tracemalloc
+import csv
 
+tracemalloc.start()
 
 def encode_board(board: chess.Board | str) -> torch.Tensor:
     if isinstance(board, str):
@@ -27,16 +30,22 @@ def load_and_encode_csv(
 ) -> tuple[list[torch.Tensor], list[torch.Tensor]]:
     boards_all = []
     points_all = []
-    chunk_iter = pd.read_csv(filepath, chunksize=batch_size)
-    currnum = 0
-    for chunk in chunk_iter:
-        print(f"Start loading of entries with indexes {currnum} to {currnum+len(chunk)}")
-        boards = chunk.iloc[:, 0].apply(encode_board).tolist()
-        points = chunk.iloc[:, 1].astype(int).tolist()
-        points = [torch.tensor([p], dtype=torch.float32) for p in points]
-        boards_all.extend(boards)
-        points_all.extend(points)
-        print(f"Loaded {len(chunk)} entries")
-        currnum += len(chunk)
+    with open(filepath, newline='') as csvfile:
+        reader = csv.reader(csvfile)
+        next(reader, None)  # Skip the header row
+        currnum = 0
+        for row in reader:
+            if len(boards_all) % batch_size == 0:
+                print(f"Start loading of entries with indexes {currnum} to {currnum+batch_size}")
+                currnum += batch_size
+            board_str = row[0]
+            point = int(float(row[1]))
+            board_tensor = encode_board(board_str)
+            point_tensor = torch.tensor([point], dtype=torch.float32)
+            boards_all.append(board_tensor)
+            points_all.append(point_tensor)
+
+
+
     return boards_all, points_all
 
