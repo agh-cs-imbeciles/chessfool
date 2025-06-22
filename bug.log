@@ -1,0 +1,17 @@
+2025-06-22 00:06:16.208485
+Traceback (most recent call last):
+  File "/home/lucas/pyLCR2/genlinux/LucasChessR/bin/Code/MainWindow/WBase.py", line 399, in run_action
+  File "/home/lucas/pyLCR2/genlinux/LucasChessR/bin/Code/Procesador.py", line 581, in run_action
+  File "/home/lucas/pyLCR2/genlinux/LucasChessR/bin/Code/Procesador.py", line 720, in options
+  File "/home/lucas/pyLCR2/genlinux/LucasChessR/bin/Code/Procesador.py", line 789, in engines
+  File "/home/lucas/pyLCR2/genlinux/LucasChessR/bin/Code/Procesador.py", line 343, in cambiaXAnalyzer
+  File "/home/lucas/pyLCR2/genlinux/LucasChessR/bin/Code/Procesador.py", line 320, in creaXAnalyzer
+  File "/home/lucas/pyLCR2/genlinux/LucasChessR/bin/Code/Config/Configuration.py", line 919, in engine_analyzer
+  File "/home/lucas/pyLCR2/genlinux/LucasChessR/bin/Code/Config/Configuration.py", line 919, in engine_analyzer
+  File "/home/lucas/pyLCR2/genlinux/LucasChessR/bin/Code/Config/Configuration.py", line 919, in engine_analyzer
+  [Previous line repeated 980 more times]
+  File "/home/lucas/pyLCR2/genlinux/LucasChessR/bin/Code/Config/Configuration.py", line 912, in engine_analyzer
+  File "/home/lucas/pyLCR2/genlinux/LucasChessR/bin/Code/Util.py", line 84, in exist_file
+  File "/home/lucas/pyLCR2/genlinux/LucasChessR/bin/Code/Util.py", line 80, in filesize
+  File "genericpath.py", line 30, in isfile
+RecursionError: maximum recursion depth exceeded while calling a Python object

@@ -8,6 +8,11 @@ chess = "~=1.11.2"
 torch = "*"
 pandas = "*"
 scikit-learn = "*"
+kagglehub = "*"
+pympler = "*"
+memory-profiler = "*"
+matplotlib = "*"
+guppy3 = "*"
 
 [dev-packages]
 

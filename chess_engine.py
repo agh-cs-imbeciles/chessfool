@@ -1,5 +1,5 @@
+#!/home/kpiotr6/Documents/stuida/IWISUM/proj/chessfool/.venv/bin/python
 import sys
-# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import os
 from math import inf
 from typing import Optional, Tuple
@@ -7,7 +7,8 @@ from typing import Optional, Tuple
 import chess
 import torch
 
-from nnue_network import SimpleNNUE, encode_board
+from utils import encode_board
+from nnue_network import SimpleNNUE
 
 nnue = SimpleNNUE()
 board = chess.Board()
@@ -150,9 +151,14 @@ def evaluate_board(board: chess.Board) -> int:
         if outcome.winner == chess.BLACK:
             return -inf
         return 0
+    # if board.turn == chess.BLACK:
+    #     board = board.mirror()
     encoded_board = encode_board(board)
     score = nnue(encoded_board)
-    score = -score[0]
+    score = score[0]
+    # if board.turn == chess.BLACK:
+    #     score = -score
+
     # values: dict[chess.PieceType, float] = {
     #     chess.PAWN: 100,
     #     chess.KNIGHT: 320,
@@ -323,12 +329,12 @@ def set_position(command: str) -> None:
 if __name__ == "__main__":
     line_width = 52
     header_char = "="
-    print(line_width * "=")
-    print(f"={'Chessfool v0.0.0'.center(line_width - 2)}=")
-    print(line_width * "=")
+    # print(line_width * "=")
+    # print(f"={'Chessfool v0.0.0'.center(line_width - 2)}=")
+    # print(line_width * "=")
 
-    print("To continue type 'uci' or 'cli'.")
-    print("Type 'quit' to exit the program.")
+    # print("To continue type 'uci' or 'cli'.")
+    # print("Type 'quit' to exit the program.")
     raw_command = get_input()
     command = raw_command.strip().lower() if raw_command is not None else "quit"
 

@@ -5,7 +5,7 @@ from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 
 class SimpleNNUE(nn.Module):
-    def __init__(self, input_size=769, hidden1_size=512, hidden2_size=128):
+    def __init__(self, input_size=768, hidden1_size=512, hidden2_size=128):
         super(SimpleNNUE, self).__init__()
         self.input_layer = nn.Linear(input_size, hidden1_size, bias=False)
         self.relu = nn.ReLU()
@@ -18,9 +18,6 @@ class SimpleNNUE(nn.Module):
         x = self.hidden_layer(x)
         x = self.relu(x)
         return self.output_layer(x)
-
-
-
 
 class ChessDataset(Dataset):
     def __init__(self, board_states, cp_losses):
@@ -67,6 +64,12 @@ def train_model(model: SimpleNNUE, dataset: ChessDataset, validation_dataset: Ch
 
             running_loss += loss.item()
 
+            # Track the best model based on validation loss
+            if epoch == 0 or (validation_loss / len(validation)) < best_val_loss:
+                best_val_loss = validation_loss / len(validation)
+                best_model_state = model.state_dict().copy()
 
         print(f"Epoch {epoch+1}, Loss: {running_loss / len(dataloader)}")
         print(f"Epoch {epoch+1}, Validation loss: {validation_loss / len(validation)}")
+    print(f"Loaded model with validation loss: {best_val_loss}")
+    model.load_state_dict(best_model_state)
