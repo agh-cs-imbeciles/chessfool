@@ -3,7 +3,7 @@ import sys
 import os
 from math import inf
 from typing import Optional, Tuple
-
+import os
 import chess
 import torch
 
@@ -12,121 +12,7 @@ from nnue_network import SimpleNNUE
 
 nnue = SimpleNNUE()
 board = chess.Board()
-DEPTH = 5
-
-WHITE_PAWN_TABLE = [
-     0,  0,  0,   0,  0,  0,  0,  0,
-     5, 10, 10,  15, 15, 10, 10,  5,
-     5,  8, 12,  20, 20, 12,  8,  5,
-     5, 10, 15,  25, 25, 15, 10,  5,
-     5, 10, 15,  30, 30, 15, 10,  5,
-     8, 12, 20,  35, 35, 20, 12,  8,
-    10, 15, 20,  30, 30, 20, 15, 10,
-     0,  0,  0,   0,  0,  0,  0,  0,
-]
-
-BLACK_PAWN_TABLE = WHITE_PAWN_TABLE[::-1]
-
-WHITE_KNIGHT_TABLE = [
-   -50,-40,-30,-30,-30,-30,-40,-50,
-   -40,-20,  0,  0,  0,  0,-20,-40,
-   -30,  0, 10, 15, 15, 10,  0,-30,
-   -30,  5, 15, 20, 20, 15,  5,-30,
-   -30,  0, 15, 20, 20, 15,  0,-30,
-   -30,  5, 10, 15, 15, 10,  5,-30,
-   -40,-20,  0,  5,  5,  0,-20,-40,
-   -50,-40,-30,-30,-30,-30,-40,-50,
-]
-
-BLACK_KNIGHT_TABLE = WHITE_KNIGHT_TABLE[::-1]
-
-WHITE_BISHOP_TABLE = [
-   -20,-10,-10,-10,-10,-10,-10,-20,
-   -10,  5,  0,  0,  0,  0,  5,-10,
-   -10, 10, 10, 10, 10, 10, 10,-10,
-   -10,  0, 10, 10, 10, 10,  0,-10,
-   -10,  5,  5, 10, 10,  5,  5,-10,
-   -10,  0,  5, 10, 10,  5,  0,-10,
-   -10,  0,  0,  0,  0,  0,  0,-10,
-   -20,-10,-10,-10,-10,-10,-10,-20,
-]
-
-BLACK_BISHOP_TABLE = WHITE_BISHOP_TABLE[::-1]
-
-WHITE_ROOK_TABLE = [
-     0,  0,  0,  5,  5,  0,  0,  0,
-    -5,  0,  0,  0,  0,  0,  0, -5,
-    -5,  0,  0,  0,  0,  0,  0, -5,
-    -5,  0,  0,  0,  0,  0,  0, -5,
-    -5,  0,  0,  0,  0,  0,  0, -5,
-    -5,  0,  0,  0,  0,  0,  0, -5,
-     5, 10, 10, 10, 10, 10, 10,  5,
-     0,  0,  0,  0,  0,  0,  0,  0,
-]
-
-BLACK_ROOK_TABLE = WHITE_ROOK_TABLE[::-1]
-
-WHITE_QUEEN_TABLE = [
-   -20,-10,-10, -5, -5,-10,-10,-20,
-   -10,  0,  0,  0,  0,  0,  0,-10,
-   -10,  0,  5,  5,  5,  5,  0,-10,
-    -5,  0,  5,  5,  5,  5,  0, -5,
-     0,  0,  5,  5,  5,  5,  0, -5,
-   -10,  5,  5,  5,  5,  5,  0,-10,
-   -10,  0,  5,  0,  0,  0,  0,-10,
-   -20,-10,-10, -5, -5,-10,-10,-20,
-]
-
-BLACK_QUEEN_TABLE = WHITE_QUEEN_TABLE[::-1]
-
-WHITE_KING_MID_TABLE = [
-   -30,-40,-40,-50,-50,-40,-40,-30,
-   -30,-40,-40,-50,-50,-40,-40,-30,
-   -30,-40,-40,-50,-50,-40,-40,-30,
-   -30,-40,-40,-50,-50,-40,-40,-30,
-   -20,-30,-30,-40,-40,-30,-30,-20,
-   -10,-20,-20,-20,-20,-20,-20,-10,
-    20, 20,  0,  0,  0,  0, 20, 20,
-    20, 30, 10,  0,  0, 10, 30, 20,
-]
-
-BLACK_KING_MID_TABLE = WHITE_KING_MID_TABLE[::-1]
-
-WHITE_KING_END_TABLE = [
-   -50,-40,-30,-20,-20,-30,-40,-50,
-   -30,-20,-10,  0,  0,-10,-20,-30,
-   -30,-10, 20, 30, 30, 20,-10,-30,
-   -30,-10, 30, 40, 40, 30,-10,-30,
-   -30,-10, 30, 40, 40, 30,-10,-30,
-   -30,-10, 20, 30, 30, 20,-10,-30,
-   -30,-30,  0,  0,  0,  0,-30,-30,
-   -50,-30,-30,-30,-30,-30,-30,-50,
-]
-
-BLACK_KING_END_TABLE = WHITE_KING_END_TABLE[::-1]
-
-PIECE_SQUARE_TABLES = {
-    (chess.PAWN, chess.WHITE): WHITE_PAWN_TABLE,
-    (chess.PAWN, chess.BLACK): BLACK_PAWN_TABLE,
-
-    (chess.KNIGHT, chess.WHITE): WHITE_KNIGHT_TABLE,
-    (chess.KNIGHT, chess.BLACK): BLACK_KNIGHT_TABLE,
-
-    (chess.BISHOP, chess.WHITE): WHITE_BISHOP_TABLE,
-    (chess.BISHOP, chess.BLACK): BLACK_BISHOP_TABLE,
-
-    (chess.ROOK, chess.WHITE): WHITE_ROOK_TABLE,
-    (chess.ROOK, chess.BLACK): BLACK_ROOK_TABLE,
-
-    (chess.QUEEN, chess.WHITE): WHITE_QUEEN_TABLE,
-    (chess.QUEEN, chess.BLACK): BLACK_QUEEN_TABLE,
-
-    # or WHITE_KING_END_TABLE depending on phase
-    (chess.KING, chess.WHITE): WHITE_KING_MID_TABLE,
-
-    # or BLACK_KING_END_TABLE depending on phase
-    (chess.KING, chess.BLACK): BLACK_KING_MID_TABLE,
-}
+DEPTH = 3
 
 
 def get_input(prompt: Optional[str] = None) -> Optional[str]:
@@ -152,24 +38,9 @@ def evaluate_board(board: chess.Board) -> int:
             return -inf
         return 0
 
-
-    values: dict[chess.PieceType, float] = {
-        chess.PAWN: 100,
-        chess.KNIGHT: 320,
-        chess.BISHOP: 330,
-        chess.ROOK: 500,
-        chess.QUEEN: 900,
-        chess.KING: 0,
-    }
-
-    score: int = 0
-
-    for piece_type, value in values.items():
-        score += len(board.pieces(piece_type, chess.WHITE)) * value
-        score -= len(board.pieces(piece_type, chess.BLACK)) * value
-
-    for square, piece in board.piece_map().items():
-        score += PIECE_SQUARE_TABLES[(piece.piece_type, piece.color)][square]
+    encoded_board = encode_board(board)
+    score = nnue(encoded_board)
+    score = score[0]
 
     return score
 
@@ -286,6 +157,8 @@ def uci() -> None:
         command = raw_command.strip()
 
         if command == "isready":
+            nnue.load_state_dict(torch.load(os.path.dirname(os.path.realpath(__file__))+"/nnue_model_weights.pth", map_location="cpu"))
+            nnue.eval()
             print("readyok")
         if command.startswith("position"):
             set_position(command)
@@ -338,7 +211,8 @@ if __name__ == "__main__":
         case "uci":
             uci()
         case "cli":
-
+            nnue.load_state_dict(torch.load(os.path.dirname(os.path.realpath(__file__))+"/nnue_model_weights.pth", map_location="cpu"))
+            nnue.eval()
             play_game(DEPTH, user_plays_white=True)
         case "quit":
             exit(os.EX_OK)
