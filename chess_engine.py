@@ -1,8 +1,8 @@
-#!/home/kpiotr6/.local/share/virtualenvs/chessfool-VJZO1WdQ/bin/python
 import sys
 import os
 from math import inf
 from typing import Optional, Tuple
+import argparse
 
 import chess
 import torch
@@ -10,9 +10,11 @@ import torch
 from utils import encode_board
 from nnue_network import SimpleNNUE
 
+depth = 6
+classic_eval = False
+
 nnue = SimpleNNUE()
 board = chess.Board()
-DEPTH = 5
 
 WHITE_PAWN_TABLE = [
      0,  0,  0,   0,  0,  0,  0,  0,
@@ -140,7 +142,7 @@ def get_input(prompt: Optional[str] = None) -> Optional[str]:
 def evaluate_board(board: chess.Board) -> int:
     """
     Basic evaluation function: returns a static evaluation of the position.
-    Positive for White, negative for Black.
+    Positive for white, negative for black.
     If the game is over for one of the players returns infinity or -infinity for
     white or black respectively or 0 in the case of draw.
     """
@@ -152,6 +154,12 @@ def evaluate_board(board: chess.Board) -> int:
             return -inf
         return 0
 
+    if not classic_eval:
+        encoded_board = encode_board(board)
+        score = nnue(encoded_board)
+        score = score[0]
+
+        return int(1000 * score)
 
     values: dict[chess.PieceType, float] = {
         chess.PAWN: 100,
@@ -292,7 +300,7 @@ def uci() -> None:
         if command.startswith("go"):
             _, best_move = alpha_beta(
                 board,
-                DEPTH,
+                depth,
                 alpha=-inf,
                 beta=inf,
                 maximising_player=board.turn
@@ -323,6 +331,34 @@ def set_position(command: str) -> None:
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Chessfool v0.0.0")
+    parser.add_argument(
+        "-d",
+        "--depth",
+        type=int,
+        default=5,
+        help="Set engine depth, default: 5",
+    )
+    parser.add_argument(
+        "-c",
+        "--classic-eval",
+        action="store_false",
+        help="Enable a classical evaluation, default: false",
+    )
+
+    args = parser.parse_args()
+
+    depth = args.depth
+    classic_eval = args.classic_eval
+
+    if not classic_eval:
+        nnue.load_state_dict(torch.load(os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            "..",
+            "nnue_model_weights.pth",
+        ), map_location="cpu"))
+        nnue.eval()
+
     line_width = 52
     header_char = "="
     print(line_width * "=")
@@ -331,6 +367,7 @@ if __name__ == "__main__":
 
     print("To continue type 'uci' or 'cli'.")
     print("Type 'quit' to exit the program.")
+
     raw_command = get_input()
     command = raw_command.strip().lower() if raw_command is not None else "quit"
 
@@ -338,8 +375,7 @@ if __name__ == "__main__":
         case "uci":
             uci()
         case "cli":
-
-            play_game(DEPTH, user_plays_white=True)
+            play_game(depth, user_plays_white=True)
         case "quit":
             exit(os.EX_OK)
         case _:
